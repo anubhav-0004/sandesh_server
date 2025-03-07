@@ -1,6 +1,6 @@
 import { compare } from "bcrypt";
 import User from "../models/user.model.js";
-import { emitEvent, sendToken } from "../utils/features.js";
+import { emitEvent, sendToken, uploadOnCloudianry } from "../utils/features.js";
 import { ErrorHandler } from "../utils/utility.js";
 import Chat from "../models/chat.model.js";
 import Request from "../models/request.model.js";
@@ -15,10 +15,11 @@ const newUsers = async (req, res, next) => {
     const file = req.file;
     console.log(file);
     if (!file) return next(new ErrorHandler("Please upload avatar."));
+    const result = await uploadOnCloudianry([file]);
 
     const avatar = {
-      public_id: "dfsghjk",
-      url: "sgfgfh",
+      public_id: result[0].public_id,
+      url: result[0].secureUrl,
     };
 
     const user = await User.create({

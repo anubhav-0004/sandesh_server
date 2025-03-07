@@ -1,7 +1,6 @@
 import mongoose from "mongoose";
 import jwt from "jsonwebtoken";
 
-
 const connectDB = (uri) => {
   mongoose
     .connect(uri, { dbName: "Sandesh" })
@@ -12,7 +11,7 @@ const connectDB = (uri) => {
 };
 
 const sendToken = (res, user, code, message) => {
-  const token = jwt.sign({_id: user._id}, process.env.JWT_SECRET);
+  const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET);
 
   return res
     .status(code)
@@ -34,14 +33,23 @@ const cookieOption = {
   sameSite: "none",
   httpOnly: true,
   secure: true,
-}
+};
 
-const emitEvent = (req, event, users, data)=>{
+const emitEvent = (req, event, users, data) => {
   console.log("Emitting Event", event);
-}
+};
 
-const deleteFilesFromCloudinary = async (public_ids) => {
+const uploadOnCloudianry = async (files = []) => {
+  // Upload files to cloudinary
+};
 
-}
+const deleteFilesFromCloudinary = async (public_ids) => {};
 
-export { connectDB, sendToken, emitEvent, cookieOption, deleteFilesFromCloudinary };
+export {
+  connectDB,
+  sendToken,
+  emitEvent,
+  cookieOption,
+  deleteFilesFromCloudinary,
+  uploadOnCloudianry,
+};

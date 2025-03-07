@@ -12,6 +12,8 @@ import { NEW_MESSAGE, NEW_MESSAGE_ALERT } from "./constants/events.js";
 import { v4 as uuid } from "uuid";
 import { getSockets } from "./lib/helper.js";
 import Message from "./models/message.model.js";
+import cors from "cors";
+import {v2 as cloudinary} from "cloudinary";
 
 dotenv.config({
   path: "./.env",
@@ -21,6 +23,12 @@ connectDB(process.env.MONGO_URI);
 const port = process.env.PORT || 3000;
 export const envMode = process.env.NODE_ENV.trim() || "PRODUCTION";
 const userSocketIDs = new Map();
+
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+})
 
 const app = express();
 const server = http.createServer(app);
@@ -33,10 +41,14 @@ const io = new Server(server, {
 
 app.use(express.json());
 app.use(cookieParser());
+app.use(cors({
+  origin: ["http://localhost:5173", "http://localhost:4173", process.env.CLIENT_URL, ],
+  credentials: true,
+}))
 
-app.use("/user", user);
-app.use("/chats", chat);
-app.use("/admin", admin);
+app.use("/api/v1/user", user);
+app.use("/api/v1/chats", chat);
+app.use("/api/v1/admin", admin);
 
 app.get("/", (req, res) => {
   res.send("Hello World");
