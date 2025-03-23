@@ -10,16 +10,16 @@ import { getOtherMember } from "../lib/helper.js";
 // Create a new user and save it to the database and save in cookie
 const newUsers = async (req, res, next) => {
   try {
-    const { name, username, password, bio } = req.body;
-
+    const { name, username, password, bio, phone } = req.body;
+    console.log("0", name, username, password, bio, phone);
     const file = req.file;
-    console.log(file);
     if (!file) return next(new ErrorHandler("Please upload avatar."));
     const result = await uploadOnCloudianry([file]);
+    console.log("2", result);
 
     const avatar = {
       public_id: result[0].public_id,
-      url: result[0].secureUrl,
+      url: result[0].url,
     };
 
     const user = await User.create({
