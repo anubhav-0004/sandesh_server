@@ -100,7 +100,19 @@ const searchUser = async function (req, res, next) {
       _id,
       name,
       avatar: avatar.url,
+      isfriend: false,
     }));
+
+    for (const user of users) {
+      const isRequestSent = await Request.find({
+        sender: req.user,
+        receiver: user._id,
+      });
+
+      if (isRequestSent.length > 0) {
+        user.isfriend = true;
+      }
+    }
 
     return res.status(200).json({
       success: true,
@@ -135,6 +147,35 @@ const sendRequest = async function (req, res, next) {
     return res.status(200).json({
       success: true,
       message: "Friend request sent.",
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+const deleteRequest = async function (req, res, next) {
+  try {
+    const { userId } = req.body;
+
+    const request = await Request.findOneAndDelete({
+      $or: [
+        { sender: req.user, receiver: userId },
+        { sender: userId, receiver: req.user },
+      ],
+    });
+
+    if (!request) {
+      return res.status(404).json({
+        success: false,
+        message: "Friend request not found.",
+      });
+    }
+
+    emitEvent(req, NEW_REQUEST, [userId]);
+
+    return res.status(200).json({
+      success: true,
+      message: "Friend request withdrawn.",
     });
   } catch (error) {
     next(error);
@@ -259,4 +300,5 @@ export {
   acceptRequest,
   getNotifications,
   getMyFriends,
+  deleteRequest,
 };

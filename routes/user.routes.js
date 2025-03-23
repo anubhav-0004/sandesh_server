@@ -1,6 +1,7 @@
 import express from "express";
 import {
   acceptRequest,
+  deleteRequest,
   getMyFriends,
   getMyProfile,
   getNotifications,
@@ -14,6 +15,7 @@ import { multerUpload } from "../middlewares/multer.js";
 import { isAuthenticated } from "../middlewares/auth.js";
 import {
   acceptRequestValidator,
+  deleteRequestValidator,
   loginValidator,
   registerValidator,
   sendRequestValidator,
@@ -56,5 +58,12 @@ app.put(
   acceptRequestValidator(),
   validateHandler,
   acceptRequest
+);
+app.delete(
+  "/delete-request",
+  isAuthenticated,
+  deleteRequestValidator(),
+  validateHandler,
+  deleteRequest
 );
 export default app;
