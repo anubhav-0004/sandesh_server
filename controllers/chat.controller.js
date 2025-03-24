@@ -13,6 +13,7 @@ import Message from "../models/message.model.js";
 
 const newGroup = async function (req, res, next) {
   try {
+    console.log("object");
     const { name, members } = req.body;
     if (members.length < 2)
       return next(

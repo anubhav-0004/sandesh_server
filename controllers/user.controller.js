@@ -11,7 +11,6 @@ import { getOtherMember } from "../lib/helper.js";
 const newUsers = async (req, res, next) => {
   try {
     const { name, username, password, bio, phone } = req.body;
-    console.log("0", name, username, password, bio, phone);
     const file = req.file;
     if (!file) return next(new ErrorHandler("Please upload avatar."));
     const result = await uploadOnCloudianry([file]);
@@ -290,6 +289,33 @@ const getMyFriends = async function (req, res, next) {
   }
 };
 
+const allUser = async (req, res, next) => {
+  try {
+    const users = await User.find({});
+
+    const transformedData = await Promise.all(
+      users.map(async ({ name, username, avatar, _id }) => {
+        return {
+          name,
+          username,
+          avatar: avatar.url,
+          _id,
+        };
+      })
+    );
+
+    const filteredData = transformedData.filter((item) => item._id.toString() !== req.user);
+    
+    return res.status(200).json({
+      success: true,
+      filteredData,
+    });
+  } catch (error) {
+    console.error(error);
+    next(error);
+  }
+};
+
 export {
   login,
   newUsers,
@@ -301,4 +327,5 @@ export {
   getNotifications,
   getMyFriends,
   deleteRequest,
+  allUser,
 };

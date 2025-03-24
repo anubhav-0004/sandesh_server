@@ -1,6 +1,7 @@
 import express from "express";
 import {
   acceptRequest,
+  allUser,
   deleteRequest,
   getMyFriends,
   getMyProfile,
@@ -45,6 +46,7 @@ app.get("/logout", isAuthenticated, logout);
 app.get("/search", isAuthenticated, searchUser);
 app.get("/notification", isAuthenticated, getNotifications);
 app.get("/friends", isAuthenticated, getMyFriends);
+app.get("/allUsers", isAuthenticated, allUser);
 app.put(
   "/send-request",
   isAuthenticated,
