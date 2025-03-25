@@ -20,7 +20,7 @@ const adminOnly = async (req, res, next) => {
         const secretKey = jwt.verify(token, process.env.JWT_SECRET);
         const adminSecretKey = process.env.ADMIN_SECRET_KEY || "anubhav-0004";
 
-        const isMatched = secretKey == adminSecretKey;
+        const isMatched = secretKey.secretKey.toString().trim() == adminSecretKey.toString().trim();
         if(!isMatched)  return next(new ErrorHandler("Only admin can access this route.", 401));
 
         next();

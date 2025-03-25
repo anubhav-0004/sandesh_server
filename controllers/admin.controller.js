@@ -9,10 +9,10 @@ const adminLogin = async (req, res, next) => {
     const { secretKey } = req.body;
 
     const adminKey = process.env.ADMIN_SECRET_KEY || "anubhav-0004";
-    const isMatch = secretKey == adminKey;
+    const isMatch = secretKey.toString().trim() === adminKey.toString().trim();
     if (!isMatch) return next(new ErrorHandler("Admin key is not valid", 401));
 
-    const token = jwt.sign(secretKey, process.env.JWT_SECRET);
+    const token = jwt.sign({secretKey}, process.env.JWT_SECRET, { expiresIn: "30m", });
 
     return res
       .status(200)
@@ -63,7 +63,7 @@ const allUsers = async (req, res, next) => {
     const users = await User.find({});
 
     const transformedData = await Promise.all(
-      users.map(async ({ name, username, avatar, _id }) => {
+      users.map(async ({ name, username, avatar, _id, createdAt }) => {
         const [groups, friends] = await Promise.all([
           Chat.countDocuments({ groupChat: true, members: _id }),
           Chat.countDocuments({ groupChat: false, members: _id }),
@@ -76,6 +76,7 @@ const allUsers = async (req, res, next) => {
           _id,
           groups,
           friends,
+          createdAt,
         };
       })
     );
@@ -98,7 +99,6 @@ const allChats = async (req, res, next) => {
 
     const transformedChats = await Promise.all(
       chats.map(async ({ members, _id, groupChat, name, creator }) => {
-        console.log(members[0]);
         const totalMessages = await Message.countDocuments({ chat: _id });
 
         return {
@@ -143,8 +143,8 @@ const allMessages = async (req, res, next) => {
         attachments,
         content,
         createdAt,
-        chat: chat._id,
-        groupChat: chat.groupChat,
+        chat: chat?._id,
+        groupChat: chat?.groupChat,
         sender: {
           _id: sender._id,
           name: sender.name,
