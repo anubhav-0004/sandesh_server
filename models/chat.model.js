@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-const {Schema, models, model } = mongoose;
+const { Schema, models, model } = mongoose;
 
 const chatSchema = new Schema(
   {
@@ -8,6 +8,11 @@ const chatSchema = new Schema(
       required: true,
       trim: true,
       maxlength: 20,
+    },
+    bio: {
+      type: String,
+      trim: true,
+      maxlength: 50,
     },
     groupChat: {
       type: Boolean,

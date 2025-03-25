@@ -6,6 +6,7 @@ import Chat from "../models/chat.model.js";
 import Request from "../models/request.model.js";
 import { NEW_REQUEST, REFETCH_CHATS } from "../constants/events.js";
 import { getOtherMember } from "../lib/helper.js";
+import mongoose from "mongoose";
 
 // Create a new user and save it to the database and save in cookie
 const newUsers = async (req, res, next) => {
@@ -107,7 +108,6 @@ const searchUser = async function (req, res, next) {
         sender: req.user,
         receiver: user._id,
       });
-
       if (isRequestSent.length > 0) {
         user.isfriend = true;
       }
@@ -152,47 +152,31 @@ const sendRequest = async function (req, res, next) {
   }
 };
 
-const deleteRequest = async function (req, res, next) {
-  try {
-    const { userId } = req.body;
-
-    const request = await Request.findOneAndDelete({
-      $or: [
-        { sender: req.user, receiver: userId },
-        { sender: userId, receiver: req.user },
-      ],
-    });
-
-    if (!request) {
-      return res.status(404).json({
-        success: false,
-        message: "Friend request not found.",
-      });
-    }
-
-    emitEvent(req, NEW_REQUEST, [userId]);
-
-    return res.status(200).json({
-      success: true,
-      message: "Friend request withdrawn.",
-    });
-  } catch (error) {
-    next(error);
-  }
-};
-
 const acceptRequest = async function (req, res, next) {
   try {
-    const { requestId, accept } = req.body;
+    //based on accept it work as accept-request as well as delete-request
+    const { requestId, accept, id } = req.body;
+    let request;
+    if(id){
+      const objId = mongoose.Types.ObjectId.createFromHexString(id);
+      const reqId = mongoose.Types.ObjectId.createFromHexString(req.user);
 
-    const request = await Request.findById(requestId)
+      request = await Request.findOne({
+        $or: [
+        { sender: objId, receiver: reqId },
+        { sender: reqId, receiver: objId },
+      ],
+      })
+    }else{
+    request = await Request.findById(requestId)
       .populate("sender", "name")
       .populate("receiver", "name");
+    }
 
     if (!request) return next(new ErrorHandler("Request not found", 404));
-
-    if (request.receiver._id.toString() !== req.user.toString())
-      return next(new ErrorHandler("Unauthorised to accept", 401));
+    console.log(request);
+    // if (request.receiver._id.toString() !== req.user.toString())
+    //   return next(new ErrorHandler("Unauthorised to accept", 401));
 
     if (!accept) {
       await request.deleteOne();
@@ -208,7 +192,7 @@ const acceptRequest = async function (req, res, next) {
     await Promise.all([
       Chat.create({
         members,
-        name: `${request.sender.name}-${request.receiver.name}`,
+        name: `${request.sender.name.slice(0,5)}-${request.receiver.name.slice(0,5)}`,
       }),
       request.deleteOne(),
     ]);
@@ -326,6 +310,5 @@ export {
   acceptRequest,
   getNotifications,
   getMyFriends,
-  deleteRequest,
   allUser,
 };

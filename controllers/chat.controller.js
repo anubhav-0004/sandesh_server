@@ -84,11 +84,13 @@ const getMyGroups = async (req, res, next) => {
       creator: req.user,
     }).populate("members", "name avatar");
 
-    const groups = chats.map(({ members, _id, name, groupChat }) => ({
+    const groups = chats.map(({ members, _id, name, groupChat, bio = "" }) => ({
       _id,
       groupChat,
       name,
+      bio,
       avatar: members.slice(0, 3).map(({ avatar }) => avatar.url),
+      members: members,
     }));
 
     return res.status(200).json({
@@ -371,6 +373,7 @@ const renameGroup = async (req, res, next) => {
 const deleteChat = async function (req, res, next) {
   try {
     const chatId = req.params.id;
+    console.log('1232123');
 
     const chat = await Chat.findById(chatId);
 
