@@ -10,7 +10,7 @@ const adminLogin = async (req, res, next) => {
 
     const adminKey = process.env.ADMIN_SECRET_KEY || "anubhav-0004";
     const isMatch = secretKey.toString().trim() === adminKey.toString().trim();
-    if (!isMatch) return next(new ErrorHandler("Admin key is not valid", 401));
+    if (!isMatch) return next(new ErrorHandler("Admin secret-key is not valid.", 401));
 
     const token = jwt.sign({secretKey}, process.env.JWT_SECRET, { expiresIn: "30m", });
 
