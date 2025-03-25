@@ -42,7 +42,7 @@ const io = new Server(server, {
 app.use(express.json());
 app.use(cookieParser());
 app.use(cors({
-  origin: ["http://localhost:5173", "http://localhost:4173","https://chat-app-frontend-indol-eight.vercel.app", process.env.CLIENT_URL, ],
+  origin: ["http://localhost:5173", "http://localhost:4173","https://chat-app-frontend-indol-eight.vercel.app","https://chat-app-frontend-anubhav-0004-projects.vercel.app", process.env.CLIENT_URL, ],
   credentials: true,
 }))
 
