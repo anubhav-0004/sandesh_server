@@ -343,8 +343,7 @@ const getChatDetails = async function (req, res, next) {
 const renameGroup = async (req, res, next) => {
   try {
     const chatId = req.params.id;
-    const { name } = req.body;
-
+    const { name, bio } = req.query;
     const chat = await Chat.findById(chatId);
 
     if (!chat) return next(new ErrorHandler("Chat not found", 404));
@@ -354,6 +353,7 @@ const renameGroup = async (req, res, next) => {
       return next(new ErrorHandler("You are not allowed to rename", 403));
 
     chat.name = name;
+    chat.bio = bio;
     await chat.save();
 
     emitEvent(req, REFETCH_CHATS, chat.members);
@@ -402,7 +402,7 @@ const deleteChat = async function (req, res, next) {
     await Promise.all([
       //Delete Files From CLoudinary
       deleteFilesFromCloudinary(public_ids),
-      Chat.deleteOne(),
+      Chat.deleteOne({_id: chatId}),
       Message.deleteMany({ chat: chatId }),
     ]);
 
