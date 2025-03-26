@@ -13,7 +13,6 @@ import Message from "../models/message.model.js";
 
 const newGroup = async function (req, res, next) {
   try {
-    console.log("object");
     const { name, members } = req.body;
     if (members.length < 2)
       return next(
@@ -81,14 +80,14 @@ const getMyGroups = async (req, res, next) => {
     const chats = await Chat.find({
       members: req.user,
       groupChat: true,
-      creator: req.user,
     }).populate("members", "name avatar");
 
-    const groups = chats.map(({ members, _id, name, groupChat, bio = "" }) => ({
+    const groups = chats.map(({ members, _id, name, groupChat, bio = "", creator }) => ({
       _id,
       groupChat,
       name,
       bio,
+      creator,
       avatar: members.slice(0, 3).map(({ avatar }) => avatar.url),
       members: members,
     }));
@@ -373,7 +372,6 @@ const renameGroup = async (req, res, next) => {
 const deleteChat = async function (req, res, next) {
   try {
     const chatId = req.params.id;
-    console.log('1232123');
 
     const chat = await Chat.findById(chatId);
 
@@ -382,7 +380,7 @@ const deleteChat = async function (req, res, next) {
     const members = chat.members;
 
     if (chat.groupChat && chat.creator.toString() !== req.user.toString())
-      return next(new ErrorHandler("You cann't delete the group", 403));
+      return next(new ErrorHandler("Only admin can delete the group", 403));
 
     if (chat.groupChat && !chat.members.includes(req.user.toString())) {
       return next(new ErrorHandler("You are not a member of this group", 403));

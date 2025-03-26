@@ -157,20 +157,20 @@ const acceptRequest = async function (req, res, next) {
     //based on accept it work as accept-request as well as delete-request
     const { requestId, accept, id } = req.body;
     let request;
-    if(id){
+    if (id) {
       const objId = mongoose.Types.ObjectId.createFromHexString(id);
       const reqId = mongoose.Types.ObjectId.createFromHexString(req.user);
 
       request = await Request.findOne({
         $or: [
-        { sender: objId, receiver: reqId },
-        { sender: reqId, receiver: objId },
-      ],
-      })
-    }else{
-    request = await Request.findById(requestId)
-      .populate("sender", "name")
-      .populate("receiver", "name");
+          { sender: objId, receiver: reqId },
+          { sender: reqId, receiver: objId },
+        ],
+      });
+    } else {
+      request = await Request.findById(requestId)
+        .populate("sender", "name")
+        .populate("receiver", "name");
     }
 
     if (!request) return next(new ErrorHandler("Request not found", 404));
@@ -192,7 +192,7 @@ const acceptRequest = async function (req, res, next) {
     await Promise.all([
       Chat.create({
         members,
-        name: `${request.sender.name.slice(0,5)}-${request.receiver.name.slice(0,5)}`,
+        name: `${request.sender.name.split(" ")[0]}-${request.receiver.name.split(" ")[0]}`,
       }),
       request.deleteOne(),
     ]);
@@ -288,8 +288,10 @@ const allUser = async (req, res, next) => {
       })
     );
 
-    const filteredData = transformedData.filter((item) => item._id.toString() !== req.user);
-    
+    const filteredData = transformedData.filter(
+      (item) => item._id.toString() !== req.user
+    );
+
     return res.status(200).json({
       success: true,
       filteredData,
