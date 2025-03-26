@@ -22,6 +22,17 @@ const userSchema = new Schema(
       required: true,
       select: false,
     },
+    email: {
+      type: String,
+      required: true,
+    },
+    phone: {
+      type: String,
+      required: true,
+    },
+    bio: {
+      type: String,
+    },
     avatar: {
       public_id: {
         type: String,

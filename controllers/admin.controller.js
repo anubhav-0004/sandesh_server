@@ -17,14 +17,14 @@ const adminLogin = async (req, res, next) => {
     return res
       .status(200)
       .cookie("sandesh-admin-token", token, {
-        maxAge: 1000 * 60 * 30,
+        maxAge: 1000 * 60 * 60,
         sameSite: "none",
         httpOnly: true,
         secure: true,
       })
       .json({
         success: true,
-        message: "Authenticated Successfully, Anubhav",
+        message: "Authenticated Successfully, Anubhav 👍",
       });
   } catch (error) {
     console.error(error);

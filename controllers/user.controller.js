@@ -11,11 +11,10 @@ import mongoose from "mongoose";
 // Create a new user and save it to the database and save in cookie
 const newUsers = async (req, res, next) => {
   try {
-    const { name, username, password, bio, phone } = req.body;
+    const { name, username, password, bio, phone, email } = req.body;
     const file = req.file;
     if (!file) return next(new ErrorHandler("Please upload avatar."));
     const result = await uploadOnCloudianry([file]);
-    console.log("2", result);
 
     const avatar = {
       public_id: result[0].public_id,
@@ -28,6 +27,8 @@ const newUsers = async (req, res, next) => {
       password,
       avatar,
       bio,
+      phone,
+      email,
     });
 
     sendToken(res, user, 201, "User Created");
@@ -122,6 +123,7 @@ const searchUser = async function (req, res, next) {
     next(error);
   }
 };
+
 
 const sendRequest = async function (req, res, next) {
   try {
