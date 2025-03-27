@@ -304,6 +304,20 @@ const allUser = async (req, res, next) => {
   }
 };
 
+const searchUserById = async function (req, res, next) {
+  try {
+    const { id } = req.query;
+    const user = await User.findById(id);
+
+    return res.status(200).json({
+      success: true,
+      user,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 export {
   login,
   newUsers,
@@ -315,4 +329,5 @@ export {
   getNotifications,
   getMyFriends,
   allUser,
+  searchUserById,
 };

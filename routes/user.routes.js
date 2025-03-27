@@ -8,6 +8,7 @@ import {
   login,
   logout,
   searchUser,
+  searchUserById,
   sendRequest,
 } from "../controllers/user.controller.js";
 import { newUsers } from "../controllers/user.controller.js";
@@ -45,6 +46,7 @@ app.get("/search", isAuthenticated, searchUser);
 app.get("/notification", isAuthenticated, getNotifications);
 app.get("/friends", isAuthenticated, getMyFriends);
 app.get("/allUsers", isAuthenticated, allUser);
+app.get("/getuser", isAuthenticated, searchUserById);
 app.put(
   "/send-request",
   isAuthenticated,
