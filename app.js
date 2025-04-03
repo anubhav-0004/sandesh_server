@@ -13,7 +13,8 @@ import { v4 as uuid } from "uuid";
 import { getSockets } from "./lib/helper.js";
 import Message from "./models/message.model.js";
 import cors from "cors";
-import {v2 as cloudinary} from "cloudinary";
+import { v2 as cloudinary } from "cloudinary";
+import { socketAuthenticator } from "./middlewares/auth.js";
 
 dotenv.config({
   path: "./.env",
@@ -28,23 +29,38 @@ cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
   api_key: process.env.CLOUDINARY_API_KEY,
   api_secret: process.env.CLOUDINARY_API_SECRET,
-})
+});
 
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: "*",
-    methods: ["GET", "POST"],
+    origin: [
+      "http://localhost:5173",
+      "http://localhost:4173",
+      "https://chat-app-frontend-indol-eight.vercel.app",
+      "https://chat-app-frontend-anubhav-0004-projects.vercel.app",
+      process.env.CLIENT_URL,
+    ],
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    credentials: true,
   },
 });
 
 app.use(express.json());
 app.use(cookieParser());
-app.use(cors({
-  origin: ["http://localhost:5173", "http://localhost:4173","https://chat-app-frontend-indol-eight.vercel.app","https://chat-app-frontend-anubhav-0004-projects.vercel.app", process.env.CLIENT_URL, ],
-  credentials: true,
-}))
+app.use(
+  cors({
+    origin: [
+      "http://localhost:5173",
+      "http://localhost:4173",
+      "https://chat-app-frontend-indol-eight.vercel.app",
+      "https://chat-app-frontend-anubhav-0004-projects.vercel.app",
+      process.env.CLIENT_URL,
+    ],
+    credentials: true,
+  })
+);
 
 app.use("/api/v1/user", user);
 app.use("/api/v1/chats", chat);
@@ -54,12 +70,17 @@ app.get("/", (req, res) => {
   res.send("Hello World");
 });
 
+io.use((socket, next) => {
+  cookieParser()(
+    socket.request,
+    socket.request.res,
+    async (err) => await socketAuthenticator(err, socket, next)
+  )
+});
+
 io.on("connection", (socket) => {
-  const user = {
-    _id: "dfghvjb",
-    name: "rainbow",
-  };
-  userSocketIDs.set(user._id.toString(), socket._id); 
+  const user = socket.user;
+  userSocketIDs.set(user._id.toString(), socket._id);
   console.log("User connected", socket.id);
 
   socket.on(NEW_MESSAGE, async ({ chatId, members, message }) => {
@@ -77,7 +98,7 @@ io.on("connection", (socket) => {
       content: message,
       sender: user._id,
       chat: chatId,
-    }
+    };
 
     const usersSocket = getSockets(members);
     io.to(usersSocket).emit(NEW_MESSAGE, {
@@ -86,7 +107,7 @@ io.on("connection", (socket) => {
     });
     io.to(usersSocket).emit(NEW_MESSAGE_ALERT, { chatId });
 
-    // console.log("New message: ", messageForRealtime);
+    console.log("New message: ", messageForRealtime);
     try {
       await Message.create(messageForDB);
     } catch (error) {
@@ -107,6 +128,5 @@ server.listen(port, () => {
     `Server is running on port ${port} in ${envMode.toLowerCase()} mode.`
   );
 });
-
 
 export { userSocketIDs };

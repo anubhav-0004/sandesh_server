@@ -1,5 +1,6 @@
 import jwt from "jsonwebtoken";
 import { ErrorHandler } from "../utils/utility.js";
+import User from "../models/user.model.js";
 
 const isAuthenticated = async (req, res, next) => {
     try {
@@ -29,4 +30,23 @@ const adminOnly = async (req, res, next) => {
     }
 }
 
-export { isAuthenticated, adminOnly };
+const socketAuthenticator = async (err, socket, next) => {
+    try {
+        if(err) return next(err);
+
+        const authToken = socket.request.cookies["sandesh-token"];
+
+        if(!authToken) return next(new ErrorHandler(" Please login to access this route", 401));
+
+        const decodedData = jwt.verify(authToken, process.env.JWT_SECRET);
+
+        socket.user = await User.findById(decodedData._id);
+        return next();
+
+    } catch (error) {
+        console.log(error);
+        return next(new ErrorHandler("Please login to access this route", 401));
+    }
+}
+
+export { isAuthenticated, adminOnly, socketAuthenticator };
