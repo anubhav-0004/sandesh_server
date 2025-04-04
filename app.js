@@ -80,7 +80,7 @@ io.use((socket, next) => {
 
 io.on("connection", (socket) => {
   const user = socket.user;
-  userSocketIDs.set(user._id.toString(), socket._id);
+  userSocketIDs.set(user._id.toString(), socket.id);
   console.log("User connected", socket.id);
 
   socket.on(NEW_MESSAGE, async ({ chatId, members, message }) => {
@@ -107,7 +107,6 @@ io.on("connection", (socket) => {
     });
     io.to(usersSocket).emit(NEW_MESSAGE_ALERT, { chatId });
 
-    console.log("New message: ", messageForRealtime);
     try {
       await Message.create(messageForDB);
     } catch (error) {
