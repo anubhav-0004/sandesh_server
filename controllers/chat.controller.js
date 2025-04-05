@@ -1,9 +1,10 @@
 import { ErrorHandler } from "../utils/utility.js";
 import Chat from "../models/chat.model.js";
-import { deleteFilesFromCloudinary, emitEvent } from "../utils/features.js";
+import { deleteFilesFromCloudinary, emitEvent, uploadOnCloudianry } from "../utils/features.js";
 import {
   ALERT,
   NEW_ATTACHMENT,
+  NEW_MESSAGE,
   NEW_MESSAGE_ALERT,
   REFETCH_CHATS,
 } from "../constants/events.js";
@@ -267,7 +268,7 @@ const sendAttachments = async function (req, res, next) {
       return next(new ErrorHandler("Please upload attachments", 400));
 
     // Upload files here
-    const attachments = [];
+    const attachments = await uploadOnCloudianry(files);
 
     const messageForRealTime = {
       content: "",
@@ -289,7 +290,7 @@ const sendAttachments = async function (req, res, next) {
 
     const message = await Message.create(messageForDB);
 
-    emitEvent(req, NEW_ATTACHMENT, chat.members, {
+    emitEvent(req, NEW_MESSAGE, chat.members, {
       message: messageForRealTime,
       chatId,
     });

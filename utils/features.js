@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 import jwt from "jsonwebtoken";
 import { v4 as uuid } from "uuid";
 import { v2 as cloudinary } from "cloudinary";
-import { getBase64 } from "../lib/helper.js";
+import { getBase64, getSockets } from "../lib/helper.js";
 
 const connectDB = (uri) => {
   mongoose
@@ -39,7 +39,9 @@ const cookieOption = {
 };
 
 const emitEvent = (req, event, users, data) => {
-  console.log("Emitting Event", event);
+  const io = req.app.get("io");
+  const usersSocket = getSockets(users);
+  io.to(usersSocket).emit(event, data);
 };
 
 const uploadOnCloudianry = async (files = []) => {
