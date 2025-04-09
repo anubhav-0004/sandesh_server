@@ -176,7 +176,6 @@ const acceptRequest = async function (req, res, next) {
     }
 
     if (!request) return next(new ErrorHandler("Request not found", 404));
-    console.log(request);
     // if (request.receiver._id.toString() !== req.user.toString())
     //   return next(new ErrorHandler("Unauthorised to accept", 401));
 
